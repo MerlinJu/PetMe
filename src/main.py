@@ -3,6 +3,7 @@ import os
 from discord.ext import commands
 from dotenv import load_dotenv
 from typing import Final
+from pymongo import MongoClient
 
 
 # load Bot Token from .env file
@@ -18,6 +19,21 @@ intents.guilds = True
 # command prefix as '!'
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+
+# create MONGO DB Client instance 
+CLIENT = MongoClient(os.getenv('MONGO_DB_URI'))
+DB = CLIENT['User_Pets'] # Database instance
+COLLECTION = DB['Pets'] # Collection instance inside the Database instance
+
+
+# Database connection Confirmation 
+try:
+    CLIENT.admin.command('ping')
+    print('Pinged your deployment. Succesfully connected to the database!')
+except Exception as e:
+    print(e)
+
+
 #GLOBALS 
 
 PETS = ['Dog', 'Cat']
@@ -27,6 +43,7 @@ PETS = ['Dog', 'Cat']
 @bot.command(name = 'pickmypet')
 async def pickmypet(ctx):
     pass
+    
 
 
 # command to call users own pet 
