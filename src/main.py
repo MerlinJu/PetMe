@@ -53,13 +53,35 @@ async def pickmypet(ctx):
         msg = await bot.wait_for('message', timeout=30.0, check=check)
         user_pet_choice = msg.content.lower()
 
+        # tell user if he already has a pet
+        if COLLECTION.find_one(
+            {
+                'user_name': ctx.author.name,
+                'server_name': ctx.guild.name,
+                'user_pet': user_pet_choice
+            }
+        ):
+            await ctx.send(f'You already have a {user_pet_choice.capitalize() }!')
+            await ctx.send('Please choose a different pet.')
+            return # exit the function immediately
+
+
         # pet choices
         PETS = ['dog', 'cat']
 
         if user_pet_choice in PETS:
             COLLECTION.update_one(
-                {'user_id': ctx.author.id}, # find the User by his ID 
-                {'$set': {'user_name': ctx.author.name, 'user_pet': user_pet_choice}},
+                {
+                    'user_id': ctx.author.id,       # find the User by his ID 
+                    'server_id': ctx.guild.id   # find the server by its ID 
+                }, 
+                {
+                    '$set': {
+                        'user_name': ctx.author.name,   # store the user name
+                        'user_pet': user_pet_choice,    # store the pet choice made by the user
+                        'server_name': ctx.guild.name   # store the server name
+                        }
+                },
                 upsert=True # if the user document wasnt found or there is none a new one will be created, otherwise updated
             )
             await ctx.send(f'You picked {user_pet_choice.capitalize()} as your own Pet!')
